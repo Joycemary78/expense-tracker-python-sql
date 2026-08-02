@@ -87,7 +87,30 @@ def spending_by_category():
         print("\n--- Spending by Category ---")
         for row in rows:
             print(f"{row[0]}: {row[1]}")
+def update_expense():
+    view_expenses()
+    expense_id = input("Enter the ID of the expense to update: ")
 
+    try:
+        new_amount = float(input("Enter new amount: "))
+    except ValueError:
+        print("Invalid amount. Update cancelled.")
+        return
+
+    new_category = input("Enter new category: ").strip().title()
+    new_date = input("Enter new date (DD-MM-YYYY): ")
+    new_note = input("Enter new note: ")
+
+    conn = sqlite3.connect("expenses.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE expenses
+        SET amount = ?, category = ?, date = ?, note = ?
+        WHERE id = ?
+    """, (new_amount, new_category, new_date, new_note, expense_id))
+    conn.commit()
+    conn.close()
+    print("Expense updated (if ID existed).")
 def menu():
     create_database()
     while True:
@@ -95,9 +118,10 @@ def menu():
         print("1. Add Expense")
         print("2. View Expenses")
         print("3. Delete Expense")
-        print("4. Total Spending")
-        print("5. Spending by Category")
-        print("6. Exit")
+        print("4. Update Expense")
+        print("5. Total Spending")
+        print("6. Spending by Category")
+        print("7. Exit")
         choice = input("Enter your choice: ")
 
         if choice == "1":
@@ -107,10 +131,12 @@ def menu():
         elif choice == "3":
             delete_expense()
         elif choice == "4":
-            total_spending()
+            update_expense()
         elif choice == "5":
-            spending_by_category()
+            total_spending()
         elif choice == "6":
+            spending_by_category()
+        elif choice == "7":
             print("Goodbye!")
             break
         else:
